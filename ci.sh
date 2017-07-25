@@ -31,6 +31,7 @@ build_test_branch () {
 		full_script_name=("$test_script"-*.sh)
 		run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i
 	done
+	cd -
 }
 
 
