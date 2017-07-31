@@ -16,6 +16,7 @@ run_until_success () {
 }
 
 build_test_branch () {
+	git clean -dff
 	git reset --hard origin/"$1"
 
 	make -j4 configure
