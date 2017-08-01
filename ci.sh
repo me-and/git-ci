@@ -54,6 +54,8 @@ do
 		new_hash=$(git rev-parse origin/"$branch")
 		if [[ "$new_hash" != "${hashes["$branch"]}" ]]
 		then
+			date
+			echo "Building origin/$branch ($new_hash)"
 			if ! build_test_branch "$branch"
 			then
 				echo "Failed building origin/$branch"
@@ -63,6 +65,8 @@ do
 			fi
 			built_something=yes
 			hashes["$branch"]=$new_hash
+			date
+			echo "Finished building origin/$branch"
 		fi
 	done
 
@@ -70,6 +74,8 @@ do
 	then
 		# Haven't built anything.  Sleep for 10 minutes to avoid
 		# tightlooping.
+		echo "Sleeping for 10 minutes"
 		sleep 600
+		date
 	fi
 done
