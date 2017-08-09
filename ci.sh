@@ -23,7 +23,11 @@ build_test_branch () {
 	./configure || return 1
 	make -j4 all || return 1
 
-	patch -p1 <"$SCRIPT_DIR"/patch.diff || return 2
+	for patchfile in "$SCRIPT_DIR"/*.diff
+	do
+		patch -p1 <"$patchfile" || return 2
+	done
+
 	cd t || return 2
 	make -k DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
