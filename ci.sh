@@ -16,21 +16,21 @@ run_until_success () {
 }
 
 build_test_branch () {
-	git clean -dff
-	git reset --hard origin/"$1"
+	git clean -dff || return 3
+	git reset --hard origin/"$1" || return 3
 
-	make -j4 configure
-	./configure
-	make -j4 all
+	make -j4 configure || return 1
+	./configure || return 1
+	make -j4 all || return 1
 
-	patch -p1 <"$SCRIPT_DIR"/patch.diff
-	cd t
-	make -k DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all
+	patch -p1 <"$SCRIPT_DIR"/patch.diff || return 2
+	cd t || return 2
+	make -k DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
 	for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
 	do
 		full_script_name=("$test_script"-*.sh)
-		run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i
+		run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i || return 1
 	done
 	cd -
 }
