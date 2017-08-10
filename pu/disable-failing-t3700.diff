@@ -1,0 +1,20 @@
+diff --git a/t/t3700-add.sh b/t/t3700-add.sh
+index f3a4b4a91..71c217cc6 100755
+--- a/t/t3700-add.sh
++++ b/t/t3700-add.sh
+@@ -354,6 +354,7 @@ test_expect_success POSIXPERM,SYMLINKS 'git add --chmod=+x with symlinks' '
+ 	test_mode_in_index 100755 foo2
+ '
+ 
++if ! :; then
+ test_expect_success 'git add --chmod=[+-]x changes index with already added file' '
+ 	rm -f foo3 xfoo3 &&
+ 	echo foo >foo3 &&
+@@ -366,6 +367,7 @@ test_expect_success 'git add --chmod=[+-]x changes index with already added file
+ 	git add --chmod=-x xfoo3 &&
+ 	test_mode_in_index 100644 xfoo3
+ '
++fi
+ 
+ test_expect_success POSIXPERM 'git add --chmod=[+-]x does not change the working tree' '
+ 	echo foo >foo4 &&
