@@ -16,7 +16,7 @@ run_until_success () {
 }
 
 build_test_branch () {
-	git clean -dff || return 3
+	git clean -dff -e previous-hashes || return 3
 	git reset --hard origin/"$1" || return 3
 
 	make -j4 configure || return 1
@@ -29,7 +29,7 @@ build_test_branch () {
 	done
 
 	cd t || return 2
-	make -k DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
+	make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
 	for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
 	do
@@ -47,6 +47,24 @@ for branch in "${BRANCHES[@]}"
 do
 	hashes["$branch"]=
 done
+
+# If we've stored off previous hashes, load those in.
+if [[ -r previous-hashes ]]
+then
+	while read -r line
+	do
+		branch_name="${line%%=*}"
+		commit="${line##*=}"
+		for branch in "${BRANCHES[@]}"
+		do
+			if [[ "$branch_name" == "$branch" ]]
+			then
+				hashes["$branch"]="$commit"
+				break
+			fi
+		done
+	done <previous-hashes
+fi
 
 while :
 do
@@ -71,6 +89,12 @@ do
 			hashes["$branch"]=$new_hash
 			date
 			echo "Finished building origin/$branch"
+
+			for branch_name in "${BRANCHES[@]}"
+			do
+				echo "${branch_name}=${hashes["$branch_name"]}" >>previous-hashes.tmp
+			done
+			mv previous-hashes.tmp previous-hashes
 		fi
 	done
 
