@@ -25,7 +25,10 @@ build_test_branch () {
 
 	for patchfile in "$SCRIPT_DIR"/*.diff "$SCRIPT_DIR"/"$1"/*.diff
 	do
-		patch -p1 <"$patchfile" || return 2
+		if [[ -r "$patchfile" ]]
+		then
+			patch -p1 <"$patchfile" || return 2
+		fi
 	done
 
 	cd t || return 2
