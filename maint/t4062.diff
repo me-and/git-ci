@@ -1,1 +1,13 @@
-../master/t4062.diff
+diff --git a/t/t4062-diff-pickaxe.sh b/t/t4062-diff-pickaxe.sh
+index 7c4903f49..5b85320d6 100755
+--- a/t/t4062-diff-pickaxe.sh
++++ b/t/t4062-diff-pickaxe.sh
+@@ -14,7 +14,7 @@ test_expect_success setup '
+ 	test_tick &&
+ 	git commit -m "A 4k file"
+ '
+-test_expect_success '-G matches' '
++test_expect_failure '-G matches' '
+ 	git diff --name-only -G "^0{4096}$" HEAD^ >out &&
+ 	test 4096-zeroes.txt = "$(cat out)"
+ '
