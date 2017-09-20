@@ -24,16 +24,3 @@ index 9c9c37811..47b2f3e1e 100755
  	git grep .fi a
  '
  
-diff --git a/t/t8010-cat-file-filters.sh b/t/t8010-cat-file-filters.sh
-index d8242e467..ce6b5e402 100755
---- a/t/t8010-cat-file-filters.sh
-+++ b/t/t8010-cat-file-filters.sh
-@@ -51,7 +51,7 @@ test_expect_success '--path=<path> complains without --textconv/--filters' '
- 	grep "path.*needs.*filters" err
- '
- 
--test_expect_success 'cat-file --textconv --batch works' '
-+test_expect_failure 'cat-file --textconv --batch works' '
- 	sha1=$(git rev-parse -q --verify HEAD:world.txt) &&
- 	test_config diff.txt.textconv "tr A-Za-z N-ZA-Mn-za-m <" &&
- 	printf "%s hello.txt\n%s hello\n" $sha1 $sha1 |
