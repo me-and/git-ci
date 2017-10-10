@@ -4,7 +4,7 @@ set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 BRANCHES=(pu next master maint)
-declare -A OCCASIONAL_FAILURE_ATTEMPTS=([t1410]=50 [t9167]=100)
+declare -A OCCASIONAL_FAILURE_ATTEMPTS=([t1410]=50 [t9128]=50 [t9167]=100)
 
 run_until_success () {
 	runs="$1"; shift
