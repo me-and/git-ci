@@ -39,6 +39,9 @@ build_test_branch () {
 		run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i || return 1
 	done
 	cd -
+
+	git clean -dff -e "$GIT_CI_DIR"/ || return 3
+	git reset --hard || return 3
 }
 
 update_branch_details () {
