@@ -75,7 +75,7 @@ do
 		then
 			date
 			echo "Building origin/$branch ($new_hash)"
-			if ! build_test_branch "$branch"
+			if ! time build_test_branch "$branch"
 			then
 				echo "Failed building origin/$branch"
 				echo "Failing hash was $new_hash"
