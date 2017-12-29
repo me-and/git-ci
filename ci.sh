@@ -33,15 +33,16 @@ build_test_branch () {
 		fi
 	done
 
-	cd t || return 2
-	make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
+	(
+		cd t || return 2
+		make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
-	for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
-	do
-		full_script_name=("$test_script"-*.sh)
-		run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i || return 1
-	done
-	cd -
+		for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
+		do
+			full_script_name=("$test_script"-*.sh)
+			run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i || return 1
+		done
+	) || return $?
 
 	git clean -dff -e "$GIT_CI_DIR"/ || return 3
 	git reset --hard || return 3
