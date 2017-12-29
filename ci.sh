@@ -64,41 +64,37 @@ update_branch_details () {
 	done
 }
 
-while :
+rc=0
+
+git fetch
+
+update_branch_details
+
+built_something=
+for branch in "${branches[@]}"
 do
-	git fetch
-
-	update_branch_details
-
-	built_something=
-	for branch in "${branches[@]}"
-	do
-		new_hash=$(git rev-parse origin/"$branch")
-		if [[ "$new_hash" != "${hashes["$branch"]}" ]]
+	new_hash=$(git rev-parse origin/"$branch")
+	if [[ "$new_hash" != "${hashes["$branch"]}" ]]
+	then
+		date
+		echo "Building origin/$branch ($new_hash)"
+		if time build_test_branch "$branch"
 		then
-			date
-			echo "Building origin/$branch ($new_hash)"
-			if ! time build_test_branch "$branch"
-			then
-				echo "Failed building origin/$branch"
-				echo "Failing hash was $new_hash"
-				echo "Last success on this branch was ${hashes["$branch"]}"
-				exit 1
-			fi
-			built_something=yes
 			mkdir -p "$GIT_CI_DIR/$branch"
 			echo "$new_hash" >"$GIT_CI_DIR/$branch/last-success"
-			date
-			echo "Finished building origin/$branch"
+		else
+			echo "Failed building origin/$branch"
+			echo "Failing hash was $new_hash"
+			echo "Last success on this branch was ${hashes["$branch"]}"
+			rc=1
 		fi
-	done
-
-	if [[ -z $built_something ]]
-	then
-		# Haven't built anything.  Sleep for 10 minutes to avoid
-		# tightlooping.
-		echo "Sleeping for 10 minutes"
-		sleep 600
+		built_something=yes
 		date
+		echo "Finished building origin/$branch"
+	else
+		echo "Skipping origin/$branch ($new_hash)"
+		echo "Already verified ${hashes["$branch"]}"
 	fi
 done
+
+exit "$rc"
