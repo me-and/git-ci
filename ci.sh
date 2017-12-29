@@ -19,6 +19,7 @@ run_until_success () {
 build_test_branch () {
 	git clean -dff -e "$GIT_CI_DIR"/ || return 3
 	git reset --hard origin/"$1" || return 3
+	git submodule update --init || return 3
 
 	make -j "$THREADS" configure || return 1
 	./configure || return 1
