@@ -2,6 +2,8 @@
 
 set -eu
 
+THREADS=1
+
 GIT_CI_DIR=git-ci
 declare -A OCCASIONAL_FAILURE_ATTEMPTS=([t1410]=50 [t9128]=50 [t9141]=50 [t9167]=100)
 
@@ -18,9 +20,9 @@ build_test_branch () {
 	git clean -dff -e "$GIT_CI_DIR"/ || return 3
 	git reset --hard origin/"$1" || return 3
 
-	make -j4 configure || return 1
+	make -j "$THREADS" configure || return 1
 	./configure || return 1
-	make -j4 all || return 1
+	make -j "$THREADS" all || return 1
 
 	for patchfile in "$GIT_CI_DIR"/*.diff "$GIT_CI_DIR"/"$1"/*.diff
 	do
@@ -31,7 +33,7 @@ build_test_branch () {
 	done
 
 	cd t || return 2
-	make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS='--jobs 4' GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
+	make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
 	for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
 	do
