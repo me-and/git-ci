@@ -35,7 +35,7 @@ build_test_branch () {
 
 	(
 		cd t || return 2
-		make DEFAULT_TEST_TARGET=prove GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
+		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-l' GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
 
 		for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
 		do
