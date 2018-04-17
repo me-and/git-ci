@@ -2,7 +2,7 @@
 
 set -eu
 
-THREADS=${THREADS:-1}
+THREADS=${THREADS:-$(($(nproc 2>/dev/null) + 1))}
 
 GIT_CI_DIR=git-ci
 declare -A OCCASIONAL_FAILURE_ATTEMPTS=([t1410]=50 [t9128]=50 [t9141]=50 [t9167]=100)
