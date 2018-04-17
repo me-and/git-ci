@@ -48,48 +48,25 @@ build_test_branch () {
 	git reset --hard || return 3
 }
 
-update_branch_details () {
-	branches=()
-	while read -r line
-	do
-		branches+=("$line")
-	done <"$GIT_CI_DIR/branches"
-
-	unset hashes
-	declare -Ag hashes
-	for branch in "${branches[@]}"
-	do
-		if [[ -r "$GIT_CI_DIR/$branch/last-success" ]]
-		then
-			hashes["$branch"]="$(<"$GIT_CI_DIR/$branch/last-success")"
-		else
-			hashes["$branch"]=
-		fi
-	done
-}
-
 rc=0
 
 git fetch
 
-update_branch_details
-
 built_something=
-for branch in "${branches[@]}"
+for branch in $(git config --get-all git-ci.branch)
 do
 	new_hash=$(git rev-parse origin/"$branch")
-	if [[ "$new_hash" != "${hashes["$branch"]}" ]]
+	if [[ "$new_hash" != "$(git config "git-ci.${branch}.last-success")" ]]
 	then
 		date
 		echo "Building origin/$branch ($new_hash)"
 		if time build_test_branch "$branch"
 		then
-			mkdir -p "$GIT_CI_DIR/$branch"
-			echo "$new_hash" >"$GIT_CI_DIR/$branch/last-success"
+			git config "git-ci.${branch}.last-success" "$new_hash"
 		else
 			echo "Failed building origin/$branch"
 			echo "Failing hash was $new_hash"
-			echo "Last success on this branch was ${hashes["$branch"]}"
+			echo "Last success on this branch was $(git config "git-ci.${branch}.last-success")"
 			rc=1
 		fi
 		built_something=yes
@@ -97,7 +74,7 @@ do
 		echo "Finished building origin/$branch"
 	else
 		echo "Skipping origin/$branch ($new_hash)"
-		echo "Already verified ${hashes["$branch"]}"
+		echo "Already verified $(git config "git-ci.${branch}.last-success")"
 	fi
 done
 
