@@ -3,9 +3,9 @@
 set -eu
 
 THREADS=${THREADS:-$(($(nproc 2>/dev/null) + 1))}
+TEST_REPEATS=5
 
 GIT_CI_DIR=git-ci
-declare -A OCCASIONAL_FAILURE_ATTEMPTS=([t1410]=50 [t9128]=50 [t9141]=50 [t9167]=100)
 
 run_until_success () {
 	runs="$1"; shift
@@ -35,12 +35,12 @@ build_test_branch () {
 
 	(
 		cd t || return 2
-		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-l --tee' GIT_PROVE_OPTS="--jobs $THREADS" GIT_SKIP_TESTS="${!OCCASIONAL_FAILURE_ATTEMPTS[*]}" all || return 1
+		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-l --tee' GIT_PROVE_OPTS="--jobs $THREADS" all
 
-		for test_script in "${!OCCASIONAL_FAILURE_ATTEMPTS[@]}"
+		for line in $(grep -lv 0 test-results/*.exit)
 		do
-			full_script_name=("$test_script"-*.sh)
-			run_until_success "${OCCASIONAL_FAILURE_ATTEMPTS["$test_script"]}" ./"${full_script_name[0]}" -i || return 1
+			test=$(basename "$line" .exit)
+			run_until_success "$TEST_REPEATS" ./"$test".sh -i || return 1
 		done
 	) || return $?
 
