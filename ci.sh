@@ -35,12 +35,12 @@ build_test_branch () {
 
 	(
 		cd t || return 2
-		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-l --tee' GIT_PROVE_OPTS="--jobs $THREADS" all
+		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-i -l --tee' GIT_PROVE_OPTS="--jobs $THREADS" all
 
 		for line in $(grep -lv 0 test-results/*.exit)
 		do
 			test=$(basename "$line" .exit)
-			run_until_success "$TEST_REPEATS" ./"$test".sh -i || return 1
+			run_until_success "$TEST_REPEATS" ./"$test".sh -i -l --tee || return 1
 		done
 	) || return $?
 
