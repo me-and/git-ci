@@ -35,7 +35,22 @@ build_test_branch () {
 
 	(
 		cd t || return 2
-		make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-i -l --tee' GIT_PROVE_OPTS="--jobs $THREADS" all
+		rc=0
+		timeout -k 10m 6h make DEFAULT_TEST_TARGET=prove GIT_TEST_OPTS='-i -l --tee' GIT_PROVE_OPTS="--jobs $THREADS" all || rc=$?
+		case "$rc" in
+			0) ;;	# Success
+			124)	# Timeout hit
+				echo 'Timed out'
+				return 1
+				;;
+			137)	# Timeout + kill timeout hit
+				echo 'Timed out, and unresponsive to SIGTERM'
+				return 1
+				;;
+			*)	# Some other exit code, presumably a regular failure
+				echo "Test exited with rc=$rc"
+				;;
+		esac
 
 		for line in $(grep -lv 0 test-results/*.exit)
 		do
